@@ -1,0 +1,52 @@
+<div class="row">
+  <!--
+  <div class="col-md-6">
+      <a class="navbar-brand" href="/">Application Transpiled</a>
+      <a *ngIf="user" class="navbar-brand"> - Usuario: {{user}} - Empresa: {{empresa}} - Periodo: {{periodo}}</a>
+  </div>
+      -->
+  <div class="col-md-12">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+      <a class="navbar-brand" href="/">Permisos de Mantenimiento</a>
+      <a class="navbar-text"> Usuario: </a>
+      <div class="mx-1">
+        <div *ngIf="user">
+          <a class="navbar-text">{{user.nickuser}}</a>
+          <a class="navbar-text px-2">{{user.catuser}}</a>
+        </div>
+      </div>
+   <!--
+      <div class="collapse navbar-collapse" id="navbarNav">
+   -->
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto ">
+          <div *ngIf="!user">
+          <li class="nav-item">
+            <a class="nav-link" href="/login">Login</a>
+          </li>
+          </div>
+          <div *ngIf="isAdmin">
+            <li class="nav-item">
+              <a class="nav-link" href="/users">Usuarios</a>
+            </li>
+          </div>
+          <div *ngIf="verPermiso">
+          <li class="nav-item">
+            <a class="nav-link" href="/per0">Permiso</a>
+          </li>
+          </div>
+          <div *ngIf="verPermiso">
+          <li class="nav-item">
+            <a class="nav-link" href="/sector">Sector</a>
+          </li>
+          </div>
+          <div *ngIf="user">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/" (click)="logout()">Logout</a>
+          </li>
+          </div>
+        </ul>
+      </div>
+    </nav>
+  </div>
+</div>

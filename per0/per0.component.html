@@ -1,0 +1,799 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-xl-4 col-xl-auto" *ngIf="presview && !editing">
+      <div class="card" *ngIf="!editing">
+        <div class="card-body">
+          <div class="card-title">Permiso0</div>
+          <p-toast></p-toast>
+          <p-table [columns]="cols" [value]="wl" selectionMode="single" [(selection)]="wo" dataKey="numero" [scrollable]="true" scrollHeight="400px">
+            <ng-template pTemplate="header" let-columns>
+              <tr>
+                <th *ngFor="let col of columns" pSortableColumn="{{col.field}}">
+                  {{col.header}}
+                  <p-sortIcon field="{{col.field}}"></p-sortIcon>
+                </th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-rowData let-columns="columns">
+              <tr [pSelectableRow]="rowData">
+                <td *ngFor="let col of columns" [ngSwitch]="true">
+
+                  <span *ngSwitchCase="col.field === 'fecha'">{{rowData[col.field] | date: 'dd-MM-yyyy' }}</span>
+                  <span *ngSwitchDefault>{{rowData[col.field]}}</span>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+          <div class="row justify-content-center mt-4">
+            <div class="col mx-2">
+              <button (click)="nuevo()" class="btn btn-secondary">Nuevo</button>
+            </div>
+            <div class="col mx-2">
+              <button *ngIf="wo.numero" (click)="editar()" class="btn btn-secondary">Editar</button>
+            </div>
+            <div class="col mx-2" *ngIf="withList">
+              <button *ngIf="presview" (click)="modolista(true)" class="btn btn-secondary">Listado</button>
+            </div>
+          </div>
+          <div class="row justify-content-center mt-4">
+            <div class="col mx-2">
+              <p-button *ngIf="wo.numero" (click)="showDialog()" icon="pi pi-external-link" label="Borrar"></p-button>
+              <p-dialog header="Borrar" [(visible)]="todelete" [style]="{width: '50vw'}" [baseZIndex]="10000">
+                  <p>Confirma la eliminacion? </p>
+                  <ng-template pTemplate="footer">
+                      <p-button icon="pi pi-check" (click)="confirma(true)" label="Si" styleClass="p-button-text"></p-button>
+                      <p-button icon="pi pi-times" (click)="confirma(false)" label="No"></p-button>
+                  </ng-template>
+              </p-dialog>
+            </div>
+            <div class="col mx-2" *ngIf="withSel">
+              <p-button *ngIf="wo.numero" (click)="showSelection()" icon="pi pi-external-link" label="Imprimir"></p-button>
+              <p-dialog header="Seleccionar" [(visible)]="toselect" [style]="{width: '50vw'}" [baseZIndex]="10000">
+                <p>Confirma la impresion? </p>
+                <ng-template pTemplate="footer">
+                  <p-button icon="pi pi-check" (click)="selecciona(true)" label="Si" styleClass="p-button-text">
+                  </p-button>
+                  <p-button icon="pi pi-times" (click)="selecciona(false)" label="No"></p-button>
+                </ng-template>
+              </p-dialog>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <div class="col" *ngIf="presview">
+
+      <p-messages [(value)]="msgs"></p-messages>
+
+      <form [formGroup]="formgr" (ngSubmit)="onSubmit()">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-body">
+
+                      <div class="row">
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('numero').errors}">
+      <label class="control-label" for="Numero">Numero Permiso</label>
+      <input type="text" [(ngModel)]="wo.numero" class="form-control" formControlName="numero" id="numero" name="numero" placeholder="" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.numero" class="alert alert-danger">
+          {{formerrors.numero}}
+      </span>
+</div>
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('fecha').errors}">
+      <label class="control-label" for="Fecha">Fecha Alta</label>
+      <input type="text" bsDatepicker [bsConfig]="datePickerConfig" [(ngModel)]="wo.fecha" class="form-control" formControlName="fecha" id="fecha" name="fecha" placeholder="" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.fecha" class="alert alert-danger">
+          {{formerrors.fecha}}
+      </span>
+
+</div>
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('sectordes').errors}">
+      <label class="control-label" for="SectorDes">Sector Tarea</label>
+<select formControlName="sectordes" id="sectordes" [(ngModel)]="wo.sectordes" class="form-control" >
+    <option value="-1" disabled>--Seleccione Sector Tarea--</option>
+    <option *ngFor="let _sectordes of sectordess; let i = index" [value]="sectordess[i].nomsector">
+      {{sectordess[i].nomsector}}
+    </option>
+</select> 
+</div>
+</div>
+    <div class="row">
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('fechaini').errors}">
+      <label class="control-label" for="FechaIni">Fecha Inicio</label>
+      <input type="text" bsDatepicker [bsConfig]="datePickerConfig" [(ngModel)]="wo.fechaini" class="form-control" formControlName="fechaini" id="fechaini" name="fechaini" placeholder="" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.fechaini" class="alert alert-danger">
+          {{formerrors.fechaini}}
+      </span>
+
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('horaini').errors}">
+      <label class="control-label" for="HoraIni">Hora Inicio</label>
+        <p-calendar [(ngModel)]="wo.horaini" [timeOnly]="true" inputId="horaini" formControlName="horaini" id="horaini" name="horaini" placeholder="" (blur)="logValidationErrors"  >
+        </p-calendar>
+      <span class="help-block" *ngIf="formerrors.horaini" class="alert alert-danger">
+          {{formerrors.horaini}}
+      </span>
+<!--
+        <p-calendar [(ngModel)]="wo.horaini" [timeOnly]="true" inputId="horaini" class="form-control" formControlName="horaini" id="horaini" name="horaini" placeholder="" (blur)="logValidationErrors"  >
+va sin el class="form-control"  parece que el p-calendar ya lo es de por si un form-control
+-->
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('horafin').errors}">
+      <label class="control-label" for="HoraFin">Hora Finaliz.</label>
+        <p-calendar [(ngModel)]="wo.horafin" [timeOnly]="true" inputId="horafin" formControlName="horafin" id="horafin" name="horafin" placeholder="" (blur)="logValidationErrors"  >
+        </p-calendar>
+      <span class="help-block" *ngIf="formerrors.horafin" class="alert alert-danger">
+          {{formerrors.horafin}}
+      </span>
+<!--
+        <p-calendar [(ngModel)]="wo.horafin" [timeOnly]="true" inputId="horafin" class="form-control" formControlName="horafin" id="horafin" name="horafin" placeholder="" (blur)="logValidationErrors"  >
+va sin el class="form-control"  parece que el p-calendar ya lo es de por si un form-control
+-->
+</div>
+<div class="col-md-4"  [ngClass]="{'is-invalid':formgr.get('turno').errors}">
+      <label class="control-label" for="Turno">Turno Trabajo</label>
+      <select id="Turno" [(ngModel)]="wo.turno" class="form-control" formControlName="turno" id="turno" name="turno" (blur)="logValidationErrors" >
+        <option selected>Mañana</option>
+        <option>Tarde</option>
+<option>Noche</option>
+
+      </select>
+      <span class="help-block" *ngIf="formerrors.turno" class="alert alert-danger">
+          {{formerrors.turno}}
+      </span>
+
+</div>
+</div>
+    <div class="row">
+<div class="col-md-12" [ngClass]="{'is-invalid':formgr.get('destarea').errors}">
+      <label class="control-label" for="DesTarea">Tarea</label>
+      <input type="text" [(ngModel)]="wo.destarea" class="form-control" formControlName="destarea" id="destarea" name="destarea" placeholder="" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.destarea" class="alert alert-danger">
+          {{formerrors.destarea}}
+      </span>
+</div>
+</div>
+    <div class="row">
+<div class="col-md-12" [ngClass]="{'is-invalid':formgr.get('inssegur').errors}">
+      <label class="control-label" for="InsSegur">Instr. Seguridad</label>
+      <input type="text" [(ngModel)]="wo.inssegur" class="form-control" formControlName="inssegur" id="inssegur" name="inssegur" placeholder="" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.inssegur" class="alert alert-danger">
+          {{formerrors.inssegur}}
+      </span>
+</div>
+</div>
+    <div class="row">
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('medicion').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.medicion" type="checkbox" formControlName="medicion" id="medicion" name="medicion" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Requiere Medicion Gases</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.medicion" class="alert alert-danger">
+          {{formerrors.medicion}}
+      </span>
+</div>
+<div class="col-md-8" [ngClass]="{'is-invalid':formgr.get('contacto').errors}">
+      <label class="control-label" for="Contacto">Contacto Emergencia</label>
+      <input type="text" [(ngModel)]="wo.contacto" class="form-control" formControlName="contacto" id="contacto" name="contacto" placeholder="" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.contacto" class="alert alert-danger">
+          {{formerrors.contacto}}
+      </span>
+</div>
+</div>
+    <div class="row">
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('personal1').errors}">
+      <label class="control-label" for="Personal1">Personal Trabajo 1</label>
+<select formControlName="personal1" id="personal1" [(ngModel)]="wo.personal1" class="form-control" >
+    <option value="-1" disabled>--Seleccione Personal Trabajo 1--</option>
+    <option *ngFor="let _personal1 of personal1s; let i = index" [value]="personal1s[i].nomuser">
+      {{personal1s[i].nomuser}}
+    </option>
+</select> 
+</div>
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('personal2').errors}">
+      <label class="control-label" for="Personal2">Personal Trabajo 2</label>
+<select formControlName="personal2" id="personal2" [(ngModel)]="wo.personal2" class="form-control" >
+    <option value="-1" disabled>--Seleccione Personal Trabajo 2--</option>
+    <option *ngFor="let _personal2 of personal2s; let i = index" [value]="personal2s[i].nomuser">
+      {{personal2s[i].nomuser}}
+    </option>
+</select> 
+</div>
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('personal3').errors}">
+      <label class="control-label" for="Personal3">Personal Trabajo 3</label>
+<select formControlName="personal3" id="personal3" [(ngModel)]="wo.personal3" class="form-control" >
+    <option value="-1" disabled>--Seleccione Personal Trabajo 3--</option>
+    <option *ngFor="let _personal3 of personal3s; let i = index" [value]="personal3s[i].nomuser">
+      {{personal3s[i].nomuser}}
+    </option>
+</select> 
+</div>
+</div>
+    <div class="row">
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('personal4').errors}">
+      <label class="control-label" for="Personal4">Personal Trabajo 4</label>
+<select formControlName="personal4" id="personal4" [(ngModel)]="wo.personal4" class="form-control" >
+    <option value="-1" disabled>--Seleccione Personal Trabajo 4--</option>
+    <option *ngFor="let _personal4 of personal4s; let i = index" [value]="personal4s[i].nomuser">
+      {{personal4s[i].nomuser}}
+    </option>
+</select> 
+</div>
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('personal5').errors}">
+      <label class="control-label" for="Personal5">Personal Trabajo 5</label>
+<select formControlName="personal5" id="personal5" [(ngModel)]="wo.personal5" class="form-control" >
+    <option value="-1" disabled>--Seleccione Personal Trabajo 5--</option>
+    <option *ngFor="let _personal5 of personal5s; let i = index" [value]="personal5s[i].nomuser">
+      {{personal5s[i].nomuser}}
+    </option>
+</select> 
+</div>
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('personal6').errors}">
+      <label class="control-label" for="Personal6">Personal Trabajo 6</label>
+<select formControlName="personal6" id="personal6" [(ngModel)]="wo.personal6" class="form-control" >
+    <option value="-1" disabled>--Seleccione Personal Trabajo 6--</option>
+    <option *ngFor="let _personal6 of personal6s; let i = index" [value]="personal6s[i].nomuser">
+      {{personal6s[i].nomuser}}
+    </option>
+</select> 
+</div>
+</div>
+    <div class="row">
+    <p-tabView>
+    <p-tabPanel header="Elem.Segur.">
+   <div class="card"><div class="card-body">
+          <div class="row">
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('casco').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.casco" type="checkbox" formControlName="casco" id="casco" name="casco" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Casco</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.casco" class="alert alert-danger">
+          {{formerrors.casco}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('antsegur').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.antsegur" type="checkbox" formControlName="antsegur" id="antsegur" name="antsegur" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Anteojo Segur</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.antsegur" class="alert alert-danger">
+          {{formerrors.antsegur}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('proaudit').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.proaudit" type="checkbox" formControlName="proaudit" id="proaudit" name="proaudit" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Prot.Auditiva</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.proaudit" class="alert alert-danger">
+          {{formerrors.proaudit}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('guante').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.guante" type="checkbox" formControlName="guante" id="guante" name="guante" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Guantes</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.guante" class="alert alert-danger">
+          {{formerrors.guante}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('zapsegur').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.zapsegur" type="checkbox" formControlName="zapsegur" id="zapsegur" name="zapsegur" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Zapato Segur</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.zapsegur" class="alert alert-danger">
+          {{formerrors.zapsegur}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('profacia').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.profacia" type="checkbox" formControlName="profacia" id="profacia" name="profacia" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Protec.Facial</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.profacia" class="alert alert-danger">
+          {{formerrors.profacia}}
+      </span>
+</div>
+</div>
+    <div class="row">
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('carsolda').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.carsolda" type="checkbox" formControlName="carsolda" id="carsolda" name="carsolda" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Caret.Soldar</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.carsolda" class="alert alert-danger">
+          {{formerrors.carsolda}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('rescarac').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.rescarac" type="checkbox" formControlName="rescarac" id="rescarac" name="rescarac" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Resp.Cara Comp</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.rescarac" class="alert alert-danger">
+          {{formerrors.rescarac}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('rescartu').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.rescartu" type="checkbox" formControlName="rescartu" id="rescartu" name="rescartu" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Resp.Cartucho</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.rescartu" class="alert alert-danger">
+          {{formerrors.rescartu}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('barpolvo').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.barpolvo" type="checkbox" formControlName="barpolvo" id="barpolvo" name="barpolvo" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Barbijo Polvo</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.barpolvo" class="alert alert-danger">
+          {{formerrors.barpolvo}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('barsolda').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.barsolda" type="checkbox" formControlName="barsolda" id="barsolda" name="barsolda" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Barbijo Soldad</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.barsolda" class="alert alert-danger">
+          {{formerrors.barsolda}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('sumaire').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.sumaire" type="checkbox" formControlName="sumaire" id="sumaire" name="sumaire" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Suminit.Aire</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.sumaire" class="alert alert-danger">
+          {{formerrors.sumaire}}
+      </span>
+</div>
+</div>
+    <div class="row">
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('equauton').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.equauton" type="checkbox" formControlName="equauton" id="equauton" name="equauton" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Equipo Auton.</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.equauton" class="alert alert-danger">
+          {{formerrors.equauton}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('venforza').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.venforza" type="checkbox" formControlName="venforza" id="venforza" name="venforza" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Ventil.Forzada</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.venforza" class="alert alert-danger">
+          {{formerrors.venforza}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('traimper').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.traimper" type="checkbox" formControlName="traimper" id="traimper" name="traimper" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Traje Imperm</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.traimper" class="alert alert-danger">
+          {{formerrors.traimper}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('delplast').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.delplast" type="checkbox" formControlName="delplast" id="delplast" name="delplast" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Delantal Plast</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.delplast" class="alert alert-danger">
+          {{formerrors.delplast}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('mamtyvek').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.mamtyvek" type="checkbox" formControlName="mamtyvek" id="mamtyvek" name="mamtyvek" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Mameluco Tyvek</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.mamtyvek" class="alert alert-danger">
+          {{formerrors.mamtyvek}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('escalera').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.escalera" type="checkbox" formControlName="escalera" id="escalera" name="escalera" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Escaleras</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.escalera" class="alert alert-danger">
+          {{formerrors.escalera}}
+      </span>
+</div>
+</div>
+    <div class="row">
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('andamio').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.andamio" type="checkbox" formControlName="andamio" id="andamio" name="andamio" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Andamio/Platf</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.andamio" class="alert alert-danger">
+          {{formerrors.andamio}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('arnsegur').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.arnsegur" type="checkbox" formControlName="arnsegur" id="arnsegur" name="arnsegur" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Arnes Seguridad</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.arnsegur" class="alert alert-danger">
+          {{formerrors.arnsegur}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('munconfi').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.munconfi" type="checkbox" formControlName="munconfi" id="munconfi" name="munconfi" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Muñeq.Esp.Confi.</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.munconfi" class="alert alert-danger">
+          {{formerrors.munconfi}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('procelec').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.procelec" type="checkbox" formControlName="procelec" id="procelec" name="procelec" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Prot.Circ.Elect.</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.procelec" class="alert alert-danger">
+          {{formerrors.procelec}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('cabtierr').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.cabtierr" type="checkbox" formControlName="cabtierr" id="cabtierr" name="cabtierr" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Cable Tierra</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.cabtierr" class="alert alert-danger">
+          {{formerrors.cabtierr}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('canetiqu').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.canetiqu" type="checkbox" formControlName="canetiqu" id="canetiqu" name="canetiqu" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Candados & Etiq.</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.canetiqu" class="alert alert-danger">
+          {{formerrors.canetiqu}}
+      </span>
+</div>
+</div>
+    <div class="row">
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('extintor').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.extintor" type="checkbox" formControlName="extintor" id="extintor" name="extintor" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Extintor</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.extintor" class="alert alert-danger">
+          {{formerrors.extintor}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('senadver').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.senadver" type="checkbox" formControlName="senadver" id="senadver" name="senadver" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Señal Adver.</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.senadver" class="alert alert-danger">
+          {{formerrors.senadver}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('cercado').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.cercado" type="checkbox" formControlName="cercado" id="cercado" name="cercado" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Cercado</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.cercado" class="alert alert-danger">
+          {{formerrors.cercado}}
+      </span>
+</div>
+<div class="col-md-2" [ngClass]="{'is-invalid':formgr.get('cinvalla').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.cinvalla" type="checkbox" formControlName="cinvalla" id="cinvalla" name="cinvalla" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Cinta Vallado</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.cinvalla" class="alert alert-danger">
+          {{formerrors.cinvalla}}
+      </span>
+</div>
+</div>
+    <div class="row">
+<div class="col-md-12" [ngClass]="{'is-invalid':formgr.get('otrelseg').errors}">
+      <label class="control-label" for="OtrElSeg">Otros Elem.Seguridad</label>
+      <input type="text" [(ngModel)]="wo.otrelseg" class="form-control" formControlName="otrelseg" id="otrelseg" name="otrelseg" placeholder="" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.otrelseg" class="alert alert-danger">
+          {{formerrors.otrelseg}}
+      </span>
+</div>
+
+   </div></div>
+</div></p-tabPanel>
+<p-tabPanel header="Trab.Caliente">
+   <div class="card"><div class="card-body">
+          <div class="row">
+<div class="col-md-3" [ngClass]="{'is-invalid':formgr.get('zapsegur').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.zapsegur" type="checkbox" formControlName="zapsegur" id="zapsegur" name="zapsegur" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Zapato Segur</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.zapsegur" class="alert alert-danger">
+          {{formerrors.zapsegur}}
+      </span>
+</div>
+
+   </div></div>
+</div></p-tabPanel>
+<p-tabPanel header="Trab.Altura">
+   <div class="card"><div class="card-body">
+          <div class="row">
+<div class="col-md-6" [ngClass]="{'is-invalid':formgr.get('altura1').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.altura1" type="checkbox" formControlName="altura1" id="altura1" name="altura1" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Permiten los factores externos que el trabajo se haga con seguridad?</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.altura1" class="alert alert-danger">
+          {{formerrors.altura1}}
+      </span>
+</div>
+<div class="col-md-6" [ngClass]="{'is-invalid':formgr.get('altura2').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.altura2" type="checkbox" formControlName="altura2" id="altura2" name="altura2" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Los trabajadores recibieron instrucciones de seguridad?</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.altura2" class="alert alert-danger">
+          {{formerrors.altura2}}
+      </span>
+</div>
+</div>
+    <div class="row">
+<div class="col-md-6" [ngClass]="{'is-invalid':formgr.get('altura3').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.altura3" type="checkbox" formControlName="altura3" id="altura3" name="altura3" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">El area se encuentra señalizada y aislada?</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.altura3" class="alert alert-danger">
+          {{formerrors.altura3}}
+      </span>
+</div>
+<div class="col-md-6" [ngClass]="{'is-invalid':formgr.get('altura4').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.altura4" type="checkbox" formControlName="altura4" id="altura4" name="altura4" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Se tomaron precauciones para la caida de objetos?</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.altura4" class="alert alert-danger">
+          {{formerrors.altura4}}
+      </span>
+</div>
+
+   </div></div>
+</div></p-tabPanel>
+<p-tabPanel header="Espac.Confin.">
+   <div class="card"><div class="card-body">
+      
+   </div></div>
+</p-tabPanel>
+<p-tabPanel header="Bloque/Etiq">
+   <div class="card"><div class="card-body">
+      
+   </div></div>
+</p-tabPanel>
+<p-tabPanel header="Amoniaco">
+   <div class="card"><div class="card-body">
+      
+   </div></div>
+</p-tabPanel>
+<p-tabPanel header="Excav/Zanja">
+   <div class="card"><div class="card-body">
+      
+   </div></div>
+</p-tabPanel>
+<p-tabPanel header="Desc/Eq.Peli">
+   <div class="card"><div class="card-body">
+      
+   </div></div>
+</p-tabPanel>
+<p-tabPanel header="Imagenes">
+   <div class="card"><div class="card-body">
+          <div class="row">
+
+            <div class="card">
+
+            <p-galleria [(value)]="filelist" [responsiveOptions]="responsiveOptions" [containerStyle]="{'max-width': '640px'}" [numVisible]="5"> 
+              <ng-template pTemplate="item" let-item>
+                  <img [src]="item.previewImageSrc" style="width: 100%;" />
+              </ng-template>
+              <ng-template pTemplate="thumbnail" let-item>
+                  <div class="p-grid p-nogutter p-justify-center">
+                      <img [src]="item.thumbnailImageSrc" />
+                  </div>
+              </ng-template>
+          </p-galleria> 
+
+          <p-galleria [images]="filelist" panelWidth="400" panelHeight="313"></p-galleria>
+          </div>
+          
+          <p-galleria [value]="filelist">
+              <ng-template pTemplate="item" let-item>
+                  <img [src]="item.previewImageSrc" [alt]="item.alt" />
+              </ng-template>
+          </p-galleria>
+<!-- 
+            
+<div class="col-md-3" [ngClass]="{'is-invalid':formgr.get('image1').errors}">
+      <label class="control-label" for="Image1">Imagen 1</label>
+      <input type="text" [(ngModel)]="wo.image1" class="form-control" formControlName="image1" id="image1" name="image1" placeholder="" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.image1" class="alert alert-danger">
+          {{formerrors.image1}}
+      </span>
+</div>
+<div class="col-md-3" [ngClass]="{'is-invalid':formgr.get('image2').errors}">
+      <label class="control-label" for="Image2">Imagen 2</label>
+      <input type="text" [(ngModel)]="wo.image2" class="form-control" formControlName="image2" id="image2" name="image2" placeholder="" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.image2" class="alert alert-danger">
+          {{formerrors.image2}}
+      </span>
+</div>
+<div class="col-md-3" [ngClass]="{'is-invalid':formgr.get('image3').errors}">
+      <label class="control-label" for="Image3">Imagen 3</label>
+      <input type="text" [(ngModel)]="wo.image3" class="form-control" formControlName="image3" id="image3" name="image3" placeholder="" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.image3" class="alert alert-danger">
+          {{formerrors.image3}}
+      </span>
+</div> -->
+
+   </div></div>
+</div></p-tabPanel>
+
+    </p-tabView>
+</div>
+    <div class="row">
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('supervisor').errors}">
+      <label class="control-label" for="Supervisor">Supervisor</label>
+<select formControlName="supervisor" id="supervisor" [(ngModel)]="wo.supervisor" class="form-control" >
+    <option value="-1" disabled>--Seleccione Supervisor--</option>
+    <option *ngFor="let _supervisor of supervisors; let i = index" [value]="supervisors[i].nomuser">
+      {{supervisors[i].nomuser}}
+    </option>
+</select> 
+</div>
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('autorizante').errors}">
+      <label class="control-label" for="Autorizante">Autorizante</label>
+<select formControlName="autorizante" id="autorizante" [(ngModel)]="wo.autorizante" class="form-control" >
+    <option value="-1" disabled>--Seleccione Autorizante--</option>
+    <option *ngFor="let _autorizante of autorizantes; let i = index" [value]="autorizantes[i].nomuser">
+      {{autorizantes[i].nomuser}}
+    </option>
+</select> 
+</div>
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('resarea').errors}">
+      <label class="control-label" for="ResArea">Resp. Area</label>
+<select formControlName="resarea" id="resarea" [(ngModel)]="wo.resarea" class="form-control" >
+    <option value="-1" disabled>--Seleccione Resp. Area--</option>
+    <option *ngFor="let _resarea of resareas; let i = index" [value]="resareas[i].nomuser">
+      {{resareas[i].nomuser}}
+    </option>
+</select> 
+</div>
+</div>
+    <div class="row">
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('aceptada').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.aceptada" type="checkbox" formControlName="aceptada" id="aceptada" name="aceptada" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Aceptada</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.aceptada" class="alert alert-danger">
+          {{formerrors.aceptada}}
+      </span>
+</div>
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('autorizada').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.autorizada" type="checkbox" formControlName="autorizada" id="autorizada" name="autorizada" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Autorizada</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.autorizada" class="alert alert-danger">
+          {{formerrors.autorizada}}
+      </span>
+</div>
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('aprobada').errors}">
+      <div class="form-check">
+         <input class="form-check-input" [(ngModel)]="wo.aprobada" type="checkbox" formControlName="aprobada" id="aprobada" name="aprobada" (blur)="logValidationErrors" >
+         <label class="form-check-label" for="gridCheck">Aprobada</label>
+      </div>
+      <span class="help-block" *ngIf="formerrors.aprobada" class="alert alert-danger">
+          {{formerrors.aprobada}}
+      </span>
+</div>
+</div>
+    <div class="row">
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('fechaace').errors}">
+      <label class="control-label" for="FechaAce">Fecha Aceptación</label>
+      <input type="text" bsDatepicker [bsConfig]="datePickerConfig" [(ngModel)]="wo.fechaace" class="form-control" formControlName="fechaace" id="fechaace" name="fechaace" placeholder="" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.fechaace" class="alert alert-danger">
+          {{formerrors.fechaace}}
+      </span>
+
+</div>
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('fechaaut').errors}">
+      <label class="control-label" for="FechaAut">Fecha Autorización</label>
+      <input type="text" bsDatepicker [bsConfig]="datePickerConfig" [(ngModel)]="wo.fechaaut" class="form-control" formControlName="fechaaut" id="fechaaut" name="fechaaut" placeholder="" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.fechaaut" class="alert alert-danger">
+          {{formerrors.fechaaut}}
+      </span>
+
+</div>
+<div class="col-md-4" [ngClass]="{'is-invalid':formgr.get('fechaapr').errors}">
+      <label class="control-label" for="FechaApr">Fecha Aprobación</label>
+      <input type="text" bsDatepicker [bsConfig]="datePickerConfig" [(ngModel)]="wo.fechaapr" class="form-control" formControlName="fechaapr" id="fechaapr" name="fechaapr" placeholder="" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.fechaapr" class="alert alert-danger">
+          {{formerrors.fechaapr}}
+      </span>
+
+</div>
+</div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-content-center mt-4">
+            <div class="col-md-4">
+              <button *ngIf="editing" (click)="addOrEdit()" type="submit" class="btn btn-primary">Confirmar</button>
+            </div>
+            <div class="col-md-4">
+              <button *ngIf="editing" (click)="clean()" type="submit" class="btn btn-secondary">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-md-12" *ngIf="withList">
+      <div class="card" *ngIf="!presview">
+        <p-table [value]="wl"  [scrollable]="true" [style]="{width:'1080px'}" scrollHeight="600px"
+        [paginator]="true" [rows]="10" [showCurrentPageReport]="true">
+          <ng-template pTemplate="colgroup" let-columns>
+            <colgroup>
+              
+            </colgroup>
+          </ng-template>
+          <ng-template pTemplate="header">
+            <tr>
+              
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-data>
+            <tr>
+              
+            </tr>
+          </ng-template>
+
+          
+
+        </p-table>
+
+        <div class="row justify-content-center mt-4">
+          <div class="col-md-2">
+            <button *ngIf="!presview" (click)="modolista(false)" class="btn btn-secondary">Volver</button>
+          </div>
+          <div class="col-md-2">
+            <button *ngIf="!presview" (click)="generatePdf()" class="btn btn-secondary">Exportar PDF</button>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</div>

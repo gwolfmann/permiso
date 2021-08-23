@@ -1,0 +1,35 @@
+﻿<div class="row justify-content-center m-4">
+
+<div class="col-md-6">
+    <div class="card mt-4">
+        <h4 class="card-header">Login</h4>
+        <div class="card-body">
+            <form [formGroup]="formgr" (ngSubmit)="onSubmit()">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <input type="text" formControlName="username" class="form-control"
+                        [ngClass]="{ 'is-invalid': submitted && f.username.errors }" />
+                    <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
+                        <div *ngIf="f.username.errors.required">Username es necesario</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" formControlName="password" class="form-control"
+                        [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
+                    <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+                        <div *ngIf="f.password.errors.required">Password es necesario</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button [disabled]="loading" class="btn btn-primary">
+                        <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+                        Login
+                    </button>
+                    <a routerLink="../users/nuevo" class="btn btn-link">Nuevo Usuario</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>

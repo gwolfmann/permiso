@@ -1,0 +1,198 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-xl-4 col-xl-auto" *ngIf="presview && !editing">
+      <div class="card" *ngIf="!editing">
+        <div class="card-body">
+          <div class="card-title">Usuario</div>
+          <p-toast></p-toast>
+          <p-table [columns]="cols" [value]="wl" selectionMode="single" [(selection)]="wo" dataKey="nickuser" [scrollable]="true" scrollHeight="400px">
+            <ng-template pTemplate="header" let-columns>
+              <tr>
+                <th *ngFor="let col of columns" pSortableColumn="{{col.field}}">
+                  {{col.header}}
+                  <p-sortIcon field="{{col.field}}"></p-sortIcon>
+                </th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-rowData let-columns="columns">
+              <tr [pSelectableRow]="rowData">
+                <td *ngFor="let col of columns" [ngSwitch]="true">
+
+                  <span *ngSwitchCase="col.field === 'fecha'">{{rowData[col.field] | date: 'dd-MM-yyyy' }}</span>
+                  <span *ngSwitchDefault>{{rowData[col.field]}}</span>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+          <div class="row justify-content-center mt-4">
+            <div class="col mx-2">
+              <button (click)="nuevo()" class="btn btn-secondary">Nuevo</button>
+            </div>
+            <div class="col mx-2">
+              <button *ngIf="wo.nickuser" (click)="editar()" class="btn btn-secondary">Editar</button>
+            </div>
+            <div class="col mx-2" *ngIf="withList">
+              <button *ngIf="presview" (click)="modolista(true)" class="btn btn-secondary">Listado</button>
+            </div>
+          </div>
+          <div class="row justify-content-center mt-4">
+            <div class="col mx-2">
+              <p-button *ngIf="wo.nickuser" (click)="showDialog()" icon="pi pi-external-link" label="Borrar"></p-button>
+              <p-dialog header="Borrar" [(visible)]="todelete" [style]="{width: '50vw'}" [baseZIndex]="10000">
+                  <p>Confirma la eliminacion? </p>
+                  <ng-template pTemplate="footer">
+                      <p-button icon="pi pi-check" (click)="confirma(true)" label="Si" styleClass="p-button-text"></p-button>
+                      <p-button icon="pi pi-times" (click)="confirma(false)" label="No"></p-button>
+                  </ng-template>
+              </p-dialog>
+            </div>
+            <div class="col mx-2" *ngIf="withSel">
+              <p-button *ngIf="wo.nickuser" (click)="showSelection()" icon="pi pi-external-link" label="Imprimir"></p-button>
+              <p-dialog header="Seleccionar" [(visible)]="toselect" [style]="{width: '50vw'}" [baseZIndex]="10000">
+                <p>Confirma la impresion? </p>
+                <ng-template pTemplate="footer">
+                  <p-button icon="pi pi-check" (click)="selecciona(true)" label="Si" styleClass="p-button-text">
+                  </p-button>
+                  <p-button icon="pi pi-times" (click)="selecciona(false)" label="No"></p-button>
+                </ng-template>
+              </p-dialog>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <div class="col" *ngIf="presview">
+
+      <p-messages [(value)]="msgs"></p-messages>
+
+      <form [formGroup]="formgr" (ngSubmit)="onSubmit()">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-body">
+
+                  <div class="col-md-10" [ngClass]="{'is-invalid':formgr.get('nomuser').errors}">
+      <label class="control-label" for="NomUser">Nombre Real</label>
+      <input type="text" [(ngModel)]="wo.nomuser" class="form-control" formControlName="nomuser" id="nomuser" name="nomuser" placeholder="Ana Perez" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.nomuser" class="alert alert-danger">
+          {{formerrors.nomuser}}
+      </span>
+</div>
+<div class="col-md-10" [ngClass]="{'is-invalid':formgr.get('nickuser').errors}">
+      <label class="control-label" for="NickUser">Usuario</label>
+      <input type="text" [(ngModel)]="wo.nickuser" class="form-control" formControlName="nickuser" id="nickuser" name="nickuser" placeholder="ana99" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.nickuser" class="alert alert-danger">
+          {{formerrors.nickuser}}
+      </span>
+</div>
+<div class="col-md-10" [ngClass]="{'is-invalid':formgr.get('password').errors}">
+      <label class="control-label" for="Password">Password</label>
+      <input type="text" [(ngModel)]="wo.password" class="form-control" formControlName="password" id="password" name="password" placeholder="" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.password" class="alert alert-danger">
+          {{formerrors.password}}
+      </span>
+</div>
+<div class="col-md-6"  [ngClass]="{'is-invalid':formgr.get('catuser').errors}">
+      <label class="control-label" for="CatUser">Categoria Usuario</label>
+      <select id="CatUser" [(ngModel)]="wo.catuser" class="form-control" formControlName="catuser" id="catuser" name="catuser" (blur)="logValidationErrors" >
+        <option selected>Administrador</option>
+        <option>Jefe-Autorizante</option>
+<option>Supervisor</option>
+<option>Resp.Area</option>
+<option>Trabajador</option>
+
+      </select>
+      <span class="help-block" *ngIf="formerrors.catuser" class="alert alert-danger">
+          {{formerrors.catuser}}
+      </span>
+
+</div>
+<div class="col-md-10" [ngClass]="{'is-invalid':formgr.get('domicilio').errors}">
+      <label class="control-label" for="Domicilio">Domicilio</label>
+      <input type="text" [(ngModel)]="wo.domicilio" class="form-control" formControlName="domicilio" id="domicilio" name="domicilio" placeholder="Ej: Jujuy 44" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.domicilio" class="alert alert-danger">
+          {{formerrors.domicilio}}
+      </span>
+</div>
+<div class="col-md-10" [ngClass]="{'is-invalid':formgr.get('localidad').errors}">
+      <label class="control-label" for="Localidad">Localidad</label>
+      <input type="text" [(ngModel)]="wo.localidad" class="form-control" formControlName="localidad" id="localidad" name="localidad" placeholder="Ej: Salta" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.localidad" class="alert alert-danger">
+          {{formerrors.localidad}}
+      </span>
+</div>
+<div class="col-md-10" [ngClass]="{'is-invalid':formgr.get('email').errors}">
+      <label class="control-label" for="Email">Correo Electronico</label>
+      <input type="text" [(ngModel)]="wo.email" class="form-control" formControlName="email" id="email" name="email" placeholder="juan@mymail.com" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.email" class="alert alert-danger">
+          {{formerrors.email}}
+      </span>
+</div>
+<div class="col-md-10" [ngClass]="{'is-invalid':formgr.get('telefono').errors}">
+      <label class="control-label" for="Telefono">Telefono</label>
+      <input type="text" [(ngModel)]="wo.telefono" class="form-control" formControlName="telefono" id="telefono" name="telefono" placeholder="091-445566" (blur)="logValidationErrors" >
+      <span class="help-block" *ngIf="formerrors.telefono" class="alert alert-danger">
+          {{formerrors.telefono}}
+      </span>
+</div>
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-content-center mt-4">
+            <div class="col-md-4">
+              <button *ngIf="editing" (click)="addOrEdit()" type="submit" class="btn btn-primary">Confirmar</button>
+            </div>
+            <div class="col-md-4">
+              <button *ngIf="editing" (click)="clean()" type="submit" class="btn btn-secondary">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-md-12" *ngIf="withList">
+      <div class="card" *ngIf="!presview">
+        <p-table [value]="wl"  [scrollable]="true" [style]="{width:'1080px'}" scrollHeight="600px"
+        [paginator]="true" [rows]="10" [showCurrentPageReport]="true">
+          <ng-template pTemplate="colgroup" let-columns>
+            <colgroup>
+              
+            </colgroup>
+          </ng-template>
+          <ng-template pTemplate="header">
+            <tr>
+              
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-data>
+            <tr>
+              
+            </tr>
+          </ng-template>
+
+          
+
+        </p-table>
+
+        <div class="row justify-content-center mt-4">
+          <div class="mx-2">
+            <button *ngIf="!presview" (click)="modolista(false)" class="btn btn-secondary">Volver</button>
+          </div>
+          <div class="mx-2">
+            <button *ngIf="!presview" (click)="generatePdf()" class="btn btn-secondary">Exportar PDF</button>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</div>
